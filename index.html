@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Gary the Cat Picture</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            text-align: center;
+            color: #333;
+        }
+        h1 {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            max-width: 90%;
+            max-height: 80%;
+            border: 5px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        img:hover {
+            transform: scale(1.05);
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Gary the Cat Picture</h1>
+    <img id="catImage" src="" alt="Random picture of Gary the Cat">
+    <div class="footer">Refresh the page for a new picture!</div>
+    <script>
+        fetch('https://garybot.dev/api/totalgarys')
+            .then(response => response.json())
+            .then(data => {
+                const totalImages = data.num;
+                const randomImageIndex = Math.floor(Math.random() * totalImages) + 2;
+                const imagePath = `https://garybot.dev/gary/gary${randomImageIndex}.jpg`;
+                document.getElementById('catImage').src = imagePath;
+            });
+    </script>
+</body>
+</html>
