@@ -4,56 +4,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Gary Picture</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
         body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #2c3e50;
+        }
+        .header {
+            padding: 10px;
             text-align: center;
-            color: #333;
         }
         h1 {
-            color: #555;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            color: #34495e;
+            font-size: 1.8em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 10px;
+        }
+        .image-container {
+            position: relative;
+            max-width: 100%;
+            max-height: 100%;
         }
         img {
-            max-width: 90%;
-            max-height: 80%;
-            border: 5px solid #ccc;
+            display: block;
+            max-width: 100%;
+            max-height: calc(100vh - 140px); /* Adjust based on header and footer height */
+            object-fit: contain;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
-        img:hover {
-            transform: scale(1.05);
+        .button-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: linear-gradient(
+                90deg,
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0) 15%,
+                rgba(0, 0, 0, 0) 85%,
+                rgba(0, 0, 0, 0.3) 100%
+            );
+        }
+        .image-container:hover .button-overlay {
+            opacity: 1;
+        }
+        .nav-buttons {
+            background-color: rgba(52, 152, 219, 0.8);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        .nav-buttons:hover {
+            background-color: rgba(41, 128, 185, 1);
+            transform: scale(1.1);
         }
         .footer {
-            margin-top: 20px;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .new-image-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        .new-image-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .image-info {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        #imageNumber {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             font-size: 1.2em;
-            color: #666;
+            color: #7f8c8d;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        @media (max-width: 600px) {
+            .button-overlay {
+                opacity: 1;
+            }
+            .footer {
+                flex-direction: column;
+                gap: 5px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Random Gary Picture</h1>
-    <img id="catImage" src="" alt="Random picture of Gary the Cat">
-    <div class="footer">Refresh the page for a new picture!</div>
+    <div class="header">
+        <h1>Random Gary Picture</h1>
+    </div>
+    <div class="main-content">
+        <div class="image-container">
+            <img id="catImage" src="/api/placeholder/400/300" alt="Random picture of Gary the Cat">
+            <div class="button-overlay">
+                <button id="prevButton" class="nav-buttons" title="Previous image">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="nextButton" class="nav-buttons" title="Next image">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <p class="loading" id="loading">Loading Gary...</p>
+    </div>
+    <div class="footer">
+        <div class="image-info">
+            Gary #<span id="imageNumber">-</span> of <span id="totalImages">-</span>
+        </div>
+        <button id="newImageButton" class="new-image-button">
+            <i class="fas fa-random"></i> New Random Gary
+        </button>
+    </div>
+
     <script>
-        fetch('https://garybot.dev/api/totalgarys')
-            .then(response => response.json())
-            .then(data => {
-                const totalImages = data.num;
-                const randomImageIndex = Math.floor(Math.random() * totalImages) + 2;
-                const imagePath = `https://garybot.dev/gary/gary${randomImageIndex}.jpg`;
-                document.getElementById('catImage').src = imagePath;
-            });
+        let currentImageIndex = 1;
+        let totalImages = 0;
+        const loading = document.getElementById('loading');
+        const imageElement = document.getElementById('catImage');
+        const imageNumberSpan = document.getElementById('imageNumber');
+        const totalImagesSpan = document.getElementById('totalImages');
+
+        function loadNewImage(index) {
+            loading.style.display = 'block';
+            imageElement.style.opacity = '0.5';
+            
+            const imagePath = `https://garybot.dev/gary/gary${index}.jpg`;
+            
+            imageElement.onload = function() {
+                loading.style.display = 'none';
+                imageElement.style.opacity = '1';
+                currentImageIndex = index;
+                imageNumberSpan.textContent = index;
+            };
+            
+            imageElement.src = imagePath;
+        }
+
+        async function initialize() {
+            try {
+                const response = await fetch('https://garybot.dev/api/totalgarys');
+                const data = await response.json();
+                totalImages = data.num;
+                totalImagesSpan.textContent = totalImages;
+                
+                const randomImageIndex = Math.floor(Math.random() * totalImages) + 1;
+                loadNewImage(randomImageIndex);
+            } catch (error) {
+                console.error('Error:', error);
+                loading.textContent = 'Error loading Gary :(';
+            }
+        }
+
+        document.getElementById('newImageButton').addEventListener('click', () => {
+            const randomImageIndex = Math.floor(Math.random() * totalImages) + 1;
+            loadNewImage(randomImageIndex);
+        });
+
+        document.getElementById('prevButton').addEventListener('click', () => {
+            const newIndex = currentImageIndex > 1 ? currentImageIndex - 1 : totalImages;
+            loadNewImage(newIndex);
+        });
+
+        document.getElementById('nextButton').addEventListener('click', () => {
+            const newIndex = currentImageIndex < totalImages ? currentImageIndex + 1 : 1;
+            loadNewImage(newIndex);
+        });
+
+        initialize();
     </script>
 </body>
 </html>
