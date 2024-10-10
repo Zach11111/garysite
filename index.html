@@ -19,13 +19,22 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #2c3e50;
         }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
         .header {
             padding: 10px;
             text-align: center;
         }
         h1 {
             color: #34495e;
-            font-size: 1.8em;
+            font-size: clamp(1.5em, 3vw, 2.5em);
             margin: 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -39,13 +48,16 @@
         }
         .image-container {
             position: relative;
-            max-width: 100%;
-            max-height: 100%;
+            max-width: min(800px, 90%);
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         img {
             display: block;
             max-width: 100%;
-            max-height: calc(100vh - 140px); /* Adjust based on header and footer height */
+            max-height: min(600px, calc(100vh - 160px));
             object-fit: contain;
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -77,8 +89,8 @@
             background-color: rgba(52, 152, 219, 0.8);
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: clamp(30px, 4vw, 50px);
+            height: clamp(30px, 4vw, 50px);
             cursor: pointer;
             border-radius: 50%;
             transition: all 0.3s ease;
@@ -86,6 +98,7 @@
             justify-content: center;
             align-items: center;
             z-index: 2;
+            font-size: clamp(12px, 1.5vw, 18px);
         }
         .nav-buttons:hover {
             background-color: rgba(41, 128, 185, 1);
@@ -97,15 +110,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: clamp(14px, 1.5vw, 18px);
         }
         .new-image-button {
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: clamp(8px, 1vw, 12px) clamp(16px, 2vw, 24px);
             border-radius: 25px;
             cursor: pointer;
-            font-size: 1em;
+            font-size: clamp(14px, 1.5vw, 18px);
             transition: all 0.3s ease;
         }
         .new-image-button:hover {
@@ -114,7 +128,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         .image-info {
-            font-size: 0.9em;
             color: #7f8c8d;
         }
         #imageNumber {
@@ -126,13 +139,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 1.2em;
+            font-size: clamp(16px, 2vw, 24px);
             color: #7f8c8d;
             background-color: rgba(255, 255, 255, 0.8);
             padding: 10px 20px;
             border-radius: 5px;
         }
         @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
             .button-overlay {
                 opacity: 1;
             }
@@ -140,37 +156,36 @@
                 flex-direction: column;
                 gap: 5px;
             }
-            h1 {
-                font-size: 1.5em;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Random Gary Picture</h1>
-    </div>
-    <div class="main-content">
-        <div class="image-container">
-            <img id="catImage" src="/api/placeholder/400/300" alt="Random picture of Gary the Cat">
-            <div class="button-overlay">
-                <button id="prevButton" class="nav-buttons" title="Previous image">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button id="nextButton" class="nav-buttons" title="Next image">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+    <div class="container">
+        <div class="header">
+            <h1>Random Gary Picture</h1>
+        </div>
+        <div class="main-content">
+            <div class="image-container">
+                <img id="catImage" src="/api/placeholder/400/300" alt="Random picture of Gary the Cat">
+                <div class="button-overlay">
+                    <button id="prevButton" class="nav-buttons" title="Previous image">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="nextButton" class="nav-buttons" title="Next image">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
+            <p class="loading" id="loading">Loading Gary...</p>
         </div>
-        <p class="loading" id="loading">Loading Gary...</p>
-    </div>
-    <div class="footer">
-        <div class="image-info">
-            Gary #<span id="imageNumber">-</span> of <span id="totalImages">-</span>
+        <div class="footer">
+            <div class="image-info">
+                Gary #<span id="imageNumber">-</span> of <span id="totalImages">-</span>
+            </div>
+            <button id="newImageButton" class="new-image-button">
+                <i class="fas fa-random"></i> New Random Gary
+            </button>
         </div>
-        <button id="newImageButton" class="new-image-button">
-            <i class="fas fa-random"></i> New Random Gary
-        </button>
     </div>
 
     <script>
@@ -185,7 +200,7 @@
             loading.style.display = 'block';
             imageElement.style.opacity = '0.5';
             
-            const imagePath = `https://garybot.dev/gary/gary${index}.jpg`;
+            const imagePath = `https://cdn.garybot.dev/gary${index}.jpg`;
             
             imageElement.onload = function() {
                 loading.style.display = 'none';
