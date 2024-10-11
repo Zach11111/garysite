@@ -129,6 +129,8 @@
         }
         .image-info {
             color: #7f8c8d;
+            display: flex;
+            align-items: center;
         }
         #imageNumber {
             font-weight: bold;
@@ -144,6 +146,20 @@
             background-color: rgba(255, 255, 255, 0.8);
             padding: 10px 20px;
             border-radius: 5px;
+        }
+        #imageInput {
+            width: 60px;
+            padding: 5px;
+            margin: 0 10px;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            font-size: inherit;
+            text-align: center;
+        }
+        #imageInput:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
         }
         @media (max-width: 600px) {
             .container {
@@ -180,7 +196,7 @@
         </div>
         <div class="footer">
             <div class="image-info">
-                Gary #<span id="imageNumber">-</span> of <span id="totalImages">-</span>
+                Gary #<input type="number" id="imageInput" min="1"> of <span id="totalImages">-</span>
             </div>
             <button id="newImageButton" class="new-image-button">
                 <i class="fas fa-random"></i> New Random Gary
@@ -193,10 +209,36 @@
         let totalImages = 0;
         const loading = document.getElementById('loading');
         const imageElement = document.getElementById('catImage');
-        const imageNumberSpan = document.getElementById('imageNumber');
+        const imageInput = document.getElementById('imageInput');
         const totalImagesSpan = document.getElementById('totalImages');
+        
+        // Create an image cache
+        const imageCache = new Map();
+        
+        function preloadImage(index) {
+            return new Promise((resolve, reject) => {
+                if (imageCache.has(index)) {
+                    resolve(imageCache.get(index));
+                    return;
+                }
+                
+                const img = new Image();
+                img.onload = () => {
+                    imageCache.set(index, img.src);
+                    resolve(img.src);
+                };
+                img.onerror = reject;
+                img.src = `https://cdn.garybot.dev/gary${index}.jpg`;
+            });
+        }
 
         function loadNewImage(index) {
+            if (index < 1 || index > totalImages) {
+                alert(`Please enter a number between 1 and ${totalImages}`);
+                imageInput.value = currentImageIndex;
+                return;
+            }
+
             loading.style.display = 'block';
             imageElement.style.opacity = '0.5';
             
@@ -206,10 +248,25 @@
                 loading.style.display = 'none';
                 imageElement.style.opacity = '1';
                 currentImageIndex = index;
-                imageNumberSpan.textContent = index;
+                imageInput.value = index;
+                
+                // Preload adjacent images after current image loads
+                const prevIndex = index > 1 ? index - 1 : totalImages;
+                const nextIndex = index < totalImages ? index + 1 : 1;
+                Promise.all([
+                    preloadImage(prevIndex),
+                    preloadImage(nextIndex)
+                ]).catch(console.error);
             };
             
-            imageElement.src = imagePath;
+            preloadImage(index)
+                .then(src => {
+                    imageElement.src = src;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loading.textContent = 'Error loading Gary :(';
+                });
         }
 
         async function initialize() {
@@ -218,6 +275,7 @@
                 const data = await response.json();
                 totalImages = data.num;
                 totalImagesSpan.textContent = totalImages;
+                imageInput.max = totalImages;
                 
                 const randomImageIndex = Math.floor(Math.random() * totalImages) + 1;
                 loadNewImage(randomImageIndex);
@@ -226,6 +284,11 @@
                 loading.textContent = 'Error loading Gary :(';
             }
         }
+
+        imageInput.addEventListener('change', () => {
+            const newIndex = parseInt(imageInput.value);
+            loadNewImage(newIndex);
+        });
 
         document.getElementById('newImageButton').addEventListener('click', () => {
             const randomImageIndex = Math.floor(Math.random() * totalImages) + 1;
